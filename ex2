@@ -1,0 +1,83 @@
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+class Sequence {
+private:
+    std::vector<char> seq;
+
+public:
+    Sequence() = default;
+
+    void setSequence(const std::vector<char>& newSeq) {
+        seq = newSeq;
+    }
+
+    std::vector<char> getSequence() const {
+        return seq;
+    }
+
+    std::string toString() const {
+        return std::string(seq.begin(), seq.end());
+    }
+
+    void setFromString(const std::string& strSeq) {
+        seq.assign(strSeq.begin(), strSeq.end());
+    }
+};
+
+int editDistance(const std::string& s1, const std::string& s2) {
+    int m = s1.size();
+    int n = s2.size();
+
+    std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1, 0));
+
+    for (int i = 0; i <= m; ++i) dp[i][0] = i;
+    for (int j = 0; j <= n; ++j) dp[0][j] = j;
+
+    for (int i = 1; i <= m; ++i) {
+        for (int j = 1; j <= n; ++j) {
+            if (s1[i - 1] == s2[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = 1 + std::min({dp[i - 1][j],
+                                         dp[i][j - 1],
+                                         dp[i - 1][j - 1]
+                                        });
+            }
+        }
+    }
+
+    return dp[m][n];
+}
+
+int main_2() {
+    int k = 2;
+
+    std::string motifStr = "ACGTAG";
+    std::string genomeStr = "ACGGATCGGCATCGT";
+
+    Sequence motifSequence, genomeSequence;
+
+
+    motifSequence.setFromString(motifStr);
+    genomeSequence.setFromString(genomeStr);
+
+    std::string motif = motifSequence.toString();
+    std::string genome = genomeSequence.toString();
+
+    int motifLength = motif.length();
+    int genomeLength = genome.length();
+
+    for (int i = 0; i <= genomeLength - motifLength; ++i) {
+        std::string substring = genome.substr(i, motifLength);
+        int dist = editDistance(motif, substring);
+        if (dist <= k) {
+            std::cout << i + 1 << " " << motifLength << "\n";
+        }
+    }
+
+    return 0;
+}
